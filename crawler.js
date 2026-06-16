@@ -44,21 +44,64 @@ async function sendTelegram(message) {
     );
 }
 
-async function main() {
-    const gold = await crawlGold();
+async function crawlDuyMong() {
+    try {
+        const { data } = await axios.get("https://giavangduymong.com/");
+        const $ = cheerio.load(data);
+        let result = null;
 
-    const message = `
+        $(".goldbox-table tbody tr").each((i, el) => {
+            const text = $(el).text();
+            if (text.includes("99.99") || text.includes("9999")) {
+                const cols = $(el)
+                    .find("td")
+                    .map((i, el) => $(el).text().trim())
+                    .get();
+
+                if (!result && cols.length >= 3) {
+                    result = {
+                        buy: cols[1],
+                        sell: cols[2],
+                    };
+                }
+            }
+        });
+        return result;
+    } catch (e) {
+        console.error("Lỗi khi cào giá Duy Mong:", e.message);
+        return null;
+    }
+}
+
+async function main() {
+    const kkvhGold = await crawlGold();
+    const duyMongGold = await crawlDuyMong();
+
+    let message = `⏰ ${new Date().toLocaleString()}\n`;
+
+    if (kkvhGold) {
+        message += `
 💰 Giá vàng 9999 Kim Khánh Việt Hùng
 
-Mua vào: ${gold.buy}
-Bán ra: ${gold.sell}
-
-⏰ ${new Date().toLocaleString()}
+Mua vào: ${kkvhGold.buy}
+Bán ra: ${kkvhGold.sell}
 `;
+    }
+
+    if (duyMongGold) {
+        message += `
+💰 Giá vàng 9999 Duy Mong
+
+Mua vào: ${duyMongGold.buy}
+Bán ra: ${duyMongGold.sell}
+`;
+    }
 
     console.log(message);
 
-    await sendTelegram(message);
+    if (kkvhGold || duyMongGold) {
+        await sendTelegram(message);
+    }
 }
 
 main();
