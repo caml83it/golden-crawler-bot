@@ -2,7 +2,7 @@ name: Gold Price Crawler
 
 on:
   schedule:
-    - cron: '0 2,5,11 * * *'
+    - cron: '0 2,8,14,20 * * *' # Every 6 hours
   workflow_dispatch:
 
 jobs:
