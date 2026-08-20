@@ -97,8 +97,6 @@ Bán ra: ${duyMongGold.sell}
 `;
     }
 
-    console.log(message);
-
     if (kkvhGold || duyMongGold) {
         await sendTelegram(message);
     }
